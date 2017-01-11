@@ -54,15 +54,16 @@ class RequestComponent extends RequestHandlerComponent
      */
     public function getParamSplitBy($param, $delimiter='~', $subDelimiter=':')
     {
-        $paramPairs = [];
         $paramChunks = array_chunk(preg_split('/('.$delimiter.'|'.$subDelimiter.')/', $this->getParam($param)), 2);
         
         $keys = array_column($paramChunks, 0);
-        $values = array_column($paramChunks, 1);
+        $unpaddedValues = array_column($paramChunks, 1);
         
-        if(count($keys) === count($values)) {
-            $paramPairs = array_combine($keys, $values);
-        }
+        $values = (count($keys) > count($unpaddedValues)) ? 
+            array_pad($unpaddedValues, count($keys), '') : 
+            $unpaddedValues;
+        
+        $paramPairs = array_combine($keys, $values);
         
         return $paramPairs;
     }
