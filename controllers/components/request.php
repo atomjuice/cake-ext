@@ -59,8 +59,11 @@ class RequestComponent extends RequestHandlerComponent
         $keys = array_column($paramChunks, 0);
         $unpaddedValues = array_column($paramChunks, 1);
         
-        $values = (count($keys) > count($unpaddedValues)) ? 
-            array_pad($unpaddedValues, count($keys), '') : 
+        $keyCount = count($keys);
+        $unpaddedCount = count($unpaddedValues);
+        
+        $values = ($keyCount > count($unpaddedCount)) ? 
+            array_pad($unpaddedValues, $keyCount, '') : 
             $unpaddedValues;
         
         $paramPairs = array_combine($keys, $values);
