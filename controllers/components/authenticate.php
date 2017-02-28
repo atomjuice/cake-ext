@@ -77,7 +77,7 @@ class AuthenticateComponent extends AuthComponent
 
         /** checking of returned password against user submitted password and removal of hashed value from Model data */
         if (!empty($data) && !empty($data[$model->alias][$this->fields['password']])) {
-            if(!password_verify($user[$this->fields['password']], $data[$model->alias][$this->fields['password']])) {
+            if (!password_verify($user[$this->fields['password']], $data[$model->alias][$this->fields['password']])) {
                 return null;
             } else {
                 unset($data[$model->alias][$this->fields['password']]);
