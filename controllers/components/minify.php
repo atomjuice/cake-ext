@@ -55,7 +55,7 @@ class MinifyComponent extends Component
     private function processOutput()
     {
         if (Configure::read('MINIFY_HTML_OUTPUT') === true) {
-            $this->controller->output = $this->minifyHtmlOutput($this->controller->output);
+            $this->controller->output = $this->minifyHtmlOutputSimple($this->controller->output);
         }
         $this->run = true;
     }
@@ -83,5 +83,37 @@ class MinifyComponent extends Component
         $htmlMin->doSortHtmlAttributes();                     // sort html-attributes, for better gzip results
         $htmlMin->doSumUpWhitespace();                        // sum-up extra whitespace from the Dom
         return $htmlMin->minify($output);
+    }
+
+    /**
+     *
+     * @param type $output
+     * @return type
+     */
+    public function minifyHtmlOutputSimple($output)
+    {
+        # Strip carriage returns and tabs
+		$search = array("\n", "\r",	"\t");
+		$output = str_replace($search, '', $output);
+
+		# Strip muliple spaces
+		$count = 1;
+		while($count) {
+			$output = str_replace('  ', ' ', $output, $count);
+		}
+		# Strip spaces around certain tags
+		$search = array(
+			'> <',
+			'<script type="text/javascript"',
+			#'<script>',
+		);
+		$replace = array(
+			"><",
+			"<script",
+			#"\n<script>\n",
+		);
+		$output = str_replace($search, $replace, $output);
+
+		return $output;
     }
 }
