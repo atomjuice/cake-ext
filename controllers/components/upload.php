@@ -117,7 +117,7 @@ class UploadComponent extends Component
         return false;
     }
 
-    public function getMimeType($fileLocation)
+    public function getFileExtension($fileLocation)
     {
         $mimes = new \Mimey\MimeTypes;
         $finfo = new finfo(FILEINFO_MIME_TYPE);
@@ -131,7 +131,7 @@ class UploadComponent extends Component
      */
     private function validateMime($fileName, $tmpName)
     {
-        $extension = $this->getMimeType($tmpName);
+        $extension = $this->getFileExtension($tmpName);
 
         if (isset($extension)) {
             $this->files[$fileName]['extension'] = $extension;
@@ -195,7 +195,7 @@ class UploadComponent extends Component
     public function upload($formElementName, $fileName, $allowedFileTypes = [], $directoryPrefix = '.')
     {
         $file = $this->files[$formElementName];
-        $extension = ($file['extension'] ?: $this->getMimeType($file['tmp_name']));
+        $extension = (isset($file['extension']) ? $file['extension'] : $this->getFileExtension($file['tmp_name']));
 
         if (!in_array($extension, $allowedFileTypes)) {
             throw new FileException("File type $extension not allowed");
@@ -205,16 +205,11 @@ class UploadComponent extends Component
             $fileName = $fileName . '.' . $extension;
         }
 
-        $filePath = realpath(UPLOAD_DIR . DS . basename($directoryPrefix)) . DS . basename($fileName);
-
-        $folder = dirname($filePath);
-        if (!$folder) {
-            throw new FileException("Upload directory '$folder' does not exist");
+        $folder = realpath(UPLOAD_DIR . DS . basename($directoryPrefix));
+        if ($folder === false) {
+            throw new FileException("Upload directory $directoryPrefix does not exist");
         }
-
-        if (!strpos($folder, UPLOAD_DIR) === 0) {
-            throw new FileException('File outside of upload directory');
-        }
+        $filePath = $folder . DS . basename($fileName);
 
         if (move_uploaded_file($file['tmp_name'], $filePath)) {
             return new File($filePath, false, 0755);
