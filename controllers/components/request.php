@@ -34,7 +34,41 @@ class RequestComponent extends RequestHandlerComponent
     {
         return $this->files;
     }
-    
+
+    /**
+     * @param array|string $values
+     * @return bool
+     */
+    public function hasPostData($values)
+    {
+        if (!is_array($values)) {
+            return !empty($this->postData[$values]);
+        }
+        foreach ($values as $value) {
+            if (empty($this->postData[$value])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param array|string $files
+     * @return bool
+     */
+    public function hasFiles($files)
+    {
+        if (!is_array($files)) {
+            return !empty($this->files[$files]);
+        }
+        foreach ($files as $file) {
+            if (empty($this->files[$file])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Returns a url GET parameter by name
      * @param type $param
