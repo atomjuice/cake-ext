@@ -1,9 +1,6 @@
 <?php
 
-class FileException extends Exception
-{
-
-}
+App::import('Vendor', 'Ext.FileException', array('file' => 'exceptions' . DS . 'FileException.php')); // loads Example/example.php
 
 /**
  * Description of upload
@@ -11,6 +8,7 @@ class FileException extends Exception
  */
 class UploadComponent extends Component
 {
+    /** @todo move to app config? */
     const MAX_SIZE = 1024000;
 
     public $components = array('Ext.Request');
@@ -104,7 +102,6 @@ class UploadComponent extends Component
     }
 
     /**
-     *
      * @param string $name
      * @return boolean
      */
@@ -117,6 +114,10 @@ class UploadComponent extends Component
         return false;
     }
 
+    /**
+     * @param string $fileLocation
+     * @return string
+     */
     public function getFileExtension($fileLocation)
     {
         $mimes = new \Mimey\MimeTypes;
@@ -212,7 +213,7 @@ class UploadComponent extends Component
         $filePath = $folder . DS . basename($fileName);
 
         if (move_uploaded_file($file['tmp_name'], $filePath)) {
-            return new File($filePath, false, 0755);
+            return new File($filePath, false, 0655);
         }
         throw new FileException('Unable to move uploaded file');
     }
