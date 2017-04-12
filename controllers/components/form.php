@@ -52,14 +52,38 @@ class FormComponent extends Component
     public function setFieldValues($fields)
     {
         foreach ($fields as $name => $value) {
-            $this->addField($name, $value);
+            if ($this->hasField($name)) {
+                $this->fields[$name]['value'] = $value;
+            }
         }
+    }
+
+    public function getValue($field)
+    {
+        $this->hasField($field, true);
+        return $this->fields[$field]['value'];
+    }
+
+    public function getValues()
+    {
+        $values = [];
+        foreach ($this->fields as $name => $field) {
+            $values[$name] = $field['value'];
+        }
+        return $values;
     }
 
     public function setError($field, $errorMessage)
     {
         $this->hasField($field, true);
         $this->fields[$field]['error'] = $errorMessage;
+    }
+
+    public function setErrors($fields)
+    {
+        foreach ($fields as $name => $value) {
+            $this->setError($name, $value);
+        }
     }
 
     public function getError($field)

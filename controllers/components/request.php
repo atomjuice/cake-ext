@@ -58,11 +58,11 @@ class RequestComponent extends RequestHandlerComponent
      */
     public function hasFiles($files)
     {
-        if (!is_array($files)) {
-            return !empty($this->files[$files]);
-        }
         foreach ($files as $file) {
             if (empty($this->files[$file])) {
+                return false;
+            }
+            if ($this->files[$file]['error'] === UPLOAD_ERR_NO_FILE) {
                 return false;
             }
         }
