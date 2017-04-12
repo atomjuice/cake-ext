@@ -4,9 +4,19 @@ class FormComponent extends Component
 {
     protected $fields = [];
 
+    /**
+     * {@inheritdoc}
+     * @codeCoverageIgnore
+     */
+    public function beforeRedirect(&$controller, $url, $status = null, $exit = true)
+    {
+        parent::beforeRedirect($controller, $url, $status, $exit);
+    }
+
     public function __construct(array $fields = [])
     {
         $this->addFields($fields);
+        parent::__construct();
     }
 
     public function getFields()
