@@ -6,12 +6,12 @@
  */
 class Mysqli_Collector extends DebugBar\DataCollector\DataCollector implements DebugBar\DataCollector\Renderable, DebugBar\DataCollector\AssetProvider
 {
-    
+
     private $connections;
-    
+
     public function __construct() {
         $sources = ConnectionManager::sourceList();
-        
+
         $connections = array();
         foreach ($sources as $source) {
             $db =& ConnectionManager::getDataSource($source);
@@ -22,12 +22,12 @@ class Mysqli_Collector extends DebugBar\DataCollector\DataCollector implements D
             }
             $connections[$source] = $db;
         }
-        
+
         $this->connections = $connections;
     }
-    
+
     /**
-     * 
+     *
      * @return array
      */
     public function collect()
@@ -45,7 +45,7 @@ class Mysqli_Collector extends DebugBar\DataCollector\DataCollector implements D
             $stmtData = $this->collectMysqli($db);
             $data['nb_statements'] += $stmtData['nb_statements'];
             $data['nb_failed_statements'] += $stmtData['nb_failed_statements'];
-            $data['accumulated_duration'] += $stmtData['accumulated_duration'];
+            $data['accumulated_duration'] += ($stmtData['accumulated_duration']/1000);
             $data['statements'] = array_merge($data['statements'],
                 array_map(function ($s) use ($source) { $s['connection'] = $source; return $s; }, $stmtData['statements']));
         }
@@ -54,7 +54,7 @@ class Mysqli_Collector extends DebugBar\DataCollector\DataCollector implements D
 
         return $data;
     }
-    
+
     /**
      * Collects data from a single TraceablePDO instance
      *
@@ -68,18 +68,18 @@ class Mysqli_Collector extends DebugBar\DataCollector\DataCollector implements D
         $durationTotal = 0;
         $statementCount = 0;
         $failedCount = 0;
-        
+
         foreach ($mysqli->getLog() as $source => $logInfo) {
-            
+
             if(is_array($logInfo)) {
-            
+
                 foreach ($logInfo as $k => $i) {
                     $stmts[] = array(
                         'sql' => $i['query'],
                         'row_count' => $i['numRows'],
                         'stmt_id' => ($k + 1),
                         'duration' => $i['took'],
-                        'duration_str' => $this->getDataFormatter()->formatDuration($i['took']),
+                        'duration_str' => $this->getDataFormatter()->formatDuration(($i['took']/1000)),
                         'is_success' => ($i['error']) ? false : true,
                         'error_code' => 0,
                         'error_message' => $i['error']
@@ -99,7 +99,7 @@ class Mysqli_Collector extends DebugBar\DataCollector\DataCollector implements D
             'statements' => $stmts
         );
     }
-    
+
     /**
      * @return string
      */
@@ -137,5 +137,5 @@ class Mysqli_Collector extends DebugBar\DataCollector\DataCollector implements D
             'js' => 'widgets/sqlqueries/widget.js'
         );
     }
-    
+
 }
