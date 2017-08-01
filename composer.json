@@ -4,7 +4,21 @@
     "description": "An extension of ",
     "type": "cakephp-plugin",
     "require": {
-        "composer/installers": "~1.0"
+        "php": "~5.6",
+        "ext-gd": "*",
+        "ext-curl": "*",
+        "ext-gettext": "*",
+        "ext-iconv": "*",
+        "ext-mcrypt": "*",
+        "ext-openssl": "*",
+        "ext-pdo_mysql": "*",
+        "composer/installers": "~1.0",
+        "sentry/sentry": "^1.7",
+        "ralouphie/mimey": "^1.0",
+        "ralouphie/getallheaders": "^2.0",
+        "voku/simple_html_dom": "2.0.29",
+        "voku/html-min": "1.0.3",
+        "maximebf/debugbar": "1.*"
     },
     "extra": {
         "installer-name": "ext",
