@@ -8,7 +8,7 @@ App::import('Core', 'RequestHandler');
  */
 class RequestComponent extends RequestHandlerComponent
 {
-    
+
     private $getData = array();
     private $postData = array();
     private $files = array();
@@ -19,17 +19,17 @@ class RequestComponent extends RequestHandlerComponent
     {
         return $this->getData;
     }
-    
+
     public function getPostData()
     {
         return $this->postData;
     }
-    
+
     public function getHeaders()
     {
         return $this->headers;
     }
-    
+
     public function getFiles()
     {
         return $this->files;
@@ -78,7 +78,7 @@ class RequestComponent extends RequestHandlerComponent
     {
         return $this->get('getData', $param);
     }
-    
+
     /**
      * Returns URL parameter split into key=>value pairs but two delimiters.
      * @param string $param
@@ -89,22 +89,22 @@ class RequestComponent extends RequestHandlerComponent
     public function getParamSplitBy($param, $delimiter='~', $subDelimiter=':')
     {
         $paramChunks = array_chunk(preg_split('/('.$delimiter.'|'.$subDelimiter.')/', urldecode($this->getParam($param))), 2);
-        
+
         $keys = array_column($paramChunks, 0);
         $unpaddedValues = array_column($paramChunks, 1);
-        
+
         $keyCount = count($keys);
         $unpaddedCount = count($unpaddedValues);
-        
-        $values = ($keyCount > count($unpaddedCount)) ? 
-            array_pad($unpaddedValues, $keyCount, '') : 
+
+        $values = ($keyCount > count($unpaddedCount)) ?
+            array_pad($unpaddedValues, $keyCount, '') :
             $unpaddedValues;
-        
+
         $paramPairs = array_combine($keys, $values);
-        
+
         return $paramPairs;
     }
-        
+
     /**
      * Returns a POST form parameter by name
      * @param type $param
@@ -122,9 +122,9 @@ class RequestComponent extends RequestHandlerComponent
     {
         return $this->get('headers', $param);
     }
-    
+
     /**
-     * 
+     *
      * @param type $param
      * @return array
      */
@@ -140,7 +140,7 @@ class RequestComponent extends RequestHandlerComponent
     {
         return $this->content;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -148,28 +148,33 @@ class RequestComponent extends RequestHandlerComponent
     {
         parent::__construct();
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function startup(&$controller)
     {
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function initialize(&$controller, $settings = array())
     {
-         /** @todo remove url from get string and split into pairs */
-        $this->getData = $_GET;
+        $this->getData = array_map(
+            function($value) {
+                return (is_string($value)) ? urldecode($value) : $value;
+            },
+            array_merge($_GET, $controller->params)
+        );
+
         $this->postData = $_POST;
         $this->content = file_get_contents('php://input');
         $this->headers = getallheaders();
         $this->files = $_FILES;
         parent::initialize($controller, $settings);
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -177,7 +182,7 @@ class RequestComponent extends RequestHandlerComponent
     {
         parent::beforeRedirect($controller, $url, $status);
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -187,7 +192,7 @@ class RequestComponent extends RequestHandlerComponent
     }
 
     /**
-     * 
+     *
      * @param string $type
      * @param string $param
      * @return type
@@ -195,11 +200,11 @@ class RequestComponent extends RequestHandlerComponent
     private function get($type, $param)
     {
         $value = false;
-        
+
         if(property_exists($this, $type) && isset($this->{$type}[$param])) {
             $value = $this->{$type}[$param];
         }
-        
+
         return $value;
     }
 }
