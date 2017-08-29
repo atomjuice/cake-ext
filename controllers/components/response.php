@@ -201,6 +201,7 @@ class ResponseComponent extends Component {
             404 => 'Not Found',
             405 => 'Method Not Allowed',
             406 => 'Not Accepted',
+            500 => 'Internal Server Error'
         );
 
         return array_key_exists($code, $validCodes);
