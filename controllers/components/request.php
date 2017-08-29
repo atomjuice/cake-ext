@@ -13,6 +13,7 @@ class RequestComponent extends RequestHandlerComponent
     private $postData = array();
     private $files = array();
     private $content = '';
+    private $contentTruncated = false;
     private $headers = array();
 
     public function getParams()
@@ -142,6 +143,15 @@ class RequestComponent extends RequestHandlerComponent
     }
 
     /**
+     * Was raw post data truncated to avoid PHP memory overflow
+     * @return boolean
+     */
+    public function isContentTruncated()
+    {
+        return $this->contentTruncated;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function __construct()
@@ -169,8 +179,8 @@ class RequestComponent extends RequestHandlerComponent
         );
 
         $this->postData = $_POST;
-        $this->content = file_get_contents('php://input');
         $this->headers = getallheaders();
+        $this->processPostContent(fopen('php://input', 'r'));
         $this->files = $_FILES;
         parent::initialize($controller, $settings);
     }
@@ -206,5 +216,45 @@ class RequestComponent extends RequestHandlerComponent
         }
 
         return $value;
+    }
+
+    /**
+     *
+     * @param handle $stream
+     */
+    private function processPostContent($stream)
+    {
+        $postSize = $this->getPostMaxSize();
+        rewind($stream);
+        $this->content = stream_get_contents($stream, $postSize);
+        $endOfFile = stream_get_meta_data($stream)['eof'];
+        $this->contentTruncated = ($endOfFile) ? false : true;
+    }
+
+
+    /**
+     * Retrieve post_max_size in bytes
+     * @return integer
+     */
+    public function getPostMaxSize()
+    {
+        return $this->parseSize(ini_get('post_max_size'));
+    }
+
+    /**
+     * Parse friendly size to integer in bytes
+     * @param string $size 8M
+     * @return integer
+     */
+    private function parseSize($size)
+    {
+        $unit = preg_replace('/[^bkmgtpezy]/i', '', $size); // Remove the non-unit characters from the size.
+        $size = preg_replace('/[^0-9\.]/', '', $size); // Remove the non-numeric characters from the size.
+        if ($unit) {
+            // Find the position of the unit in the ordered string which is the power of magnitude to multiply a kilobyte by.
+            return $bytesSize = $size * pow(1024, stripos('bkmgtpezy', $unit[0]));
+        }
+
+        return round($size);
     }
 }
