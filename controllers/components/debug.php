@@ -27,6 +27,10 @@ class DebugComponent extends Component
         $debugBar = new StandardDebugBar();
         ClassRegistry::getInstance()->addObject('debugBar', $debugBar);
 
+        if (isset($_SERVER['REQUEST_TIME_FLOAT'])) {
+            $this->getInstance()['time']->addMeasure('Starting Application Bootstrap and Routing.', (float) $_SERVER['REQUEST_TIME_FLOAT'], microtime(true));
+        }
+
         $this->getInstance()['time']->startMeasure(get_class($controller) . '_controller', 'Starting ' . get_class($controller) . '.');
         $this->getInstance()['time']->startMeasure(get_class($controller) . '_controller_beforefilter', 'Starting ' . get_class($controller) . ' beforeFilter.');
 
@@ -62,11 +66,12 @@ class DebugComponent extends Component
      */
     public function beforeRender(&$controller)
     {
-        $this->getInstance()['time']->stopMeasure(get_class($controller) . '_controller_action');
-        $this->getInstance()['time']->stopMeasure(get_class($controller) . '_controller');
-
         $debugbarRenderer = $this->getInstance()->getJavascriptRenderer();
         $debugbarRenderer->setBaseUrl('/ext/');
+
+        $this->getInstance()['time']->stopMeasure(get_class($controller) . '_controller_action');
+        $this->getInstance()['time']->startMeasure(get_class($controller) . '_controller_render', 'Starting ' . get_class($controller) . '->' . $controller->action . ' render.');
+//
         $controller->set('debugbarRenderer', $debugbarRenderer);
         $controller->set('debugShow', (Configure::read('PRODUCTION')) ? ((Configure::read('debug') < 2) ? false : true) : true);
         parent::beforeRender($controller);
@@ -77,6 +82,8 @@ class DebugComponent extends Component
      */
     public function shutdown(&$controller)
     {
+        $debugbarRenderer = $this->getInstance()->getJavascriptRenderer();
+        echo (((Configure::read('PRODUCTION')) ? ((Configure::read('debug') < 2) ? false : true) : true)) ? $debugbarRenderer->render() : '';
         parent::shutdown($controller);
     }
 }
