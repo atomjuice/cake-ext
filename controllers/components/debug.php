@@ -82,8 +82,10 @@ class DebugComponent extends Component
      */
     public function shutdown(&$controller)
     {
-        $debugbarRenderer = $this->getInstance()->getJavascriptRenderer();
-        echo (((Configure::read('PRODUCTION')) ? ((Configure::read('debug') < 2) ? false : true) : true)) ? $debugbarRenderer->render() : '';
+        if($controller->autoRender) {
+            $debugbarRenderer = $this->getInstance()->getJavascriptRenderer();
+            echo (((Configure::read('PRODUCTION')) ? ((Configure::read('debug') < 2) ? false : true) : true)) ? $debugbarRenderer->render() : '';
+        }
         parent::shutdown($controller);
     }
 }
