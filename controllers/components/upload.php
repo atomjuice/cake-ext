@@ -1,6 +1,6 @@
 <?php
 
-App::import('Vendor', 'Ext.FileException', array('file' => 'exceptions' . DS . 'FileException.php')); // loads Example/example.php
+use App\Custom\Exception\FileException;
 
 /**
  * Description of upload
