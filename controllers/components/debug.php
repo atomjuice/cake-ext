@@ -69,9 +69,12 @@ class DebugComponent extends Component
         $debugbarRenderer = $this->getInstance()->getJavascriptRenderer();
         $debugbarRenderer->setBaseUrl('/ext/');
 
-        $this->getInstance()['time']->stopMeasure(get_class($controller) . '_controller_action');
+        /** prevents error404 new controller switch from failing */
+        if($this->getInstance()['time']->hasStartedMeasure(get_class($controller) . '_controller_action')) {
+            $this->getInstance()['time']->stopMeasure(get_class($controller) . '_controller_action');
+        }
         $this->getInstance()['time']->startMeasure(get_class($controller) . '_controller_render', 'Starting ' . get_class($controller) . '->' . $controller->action . ' render.');
-//
+        
         $controller->set('debugbarRenderer', $debugbarRenderer);
         $controller->set('debugShow', (Configure::read('PRODUCTION')) ? ((Configure::read('debug') < 2) ? false : true) : true);
         parent::beforeRender($controller);
