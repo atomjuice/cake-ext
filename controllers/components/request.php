@@ -8,17 +8,28 @@ App::import('Core', 'RequestHandler');
  */
 class RequestComponent extends RequestHandlerComponent
 {
-
-    private $getData = array();
-    private $postData = array();
-    private $files = array();
+    private $parameters = [];
+    private $controllerParams = [];
+    private $getData = [];
+    private $postData = [];
+    private $files = [];
     private $content = '';
     private $contentTruncated = false;
-    private $headers = array();
+    private $headers = [];
 
     public function getParams()
     {
+        return $this->parameters;
+    }
+
+    public function getQueryParams()
+    {
         return $this->getData;
+    }
+
+    public function getControllerParams()
+    {
+        return $this->controllerParams;
     }
 
     public function getPostData()
@@ -71,11 +82,31 @@ class RequestComponent extends RequestHandlerComponent
     }
 
     /**
-     * Returns a url GET parameter by name
-     * @param type $param
-     * @return value of parameter or false
+     * Returns a url GET parameter by name including named http://parameters/
+     * @param string $param
+     * @return string value of parameter or false
      */
     public function getParam($param)
+    {
+        return $this->get('parameters', $param);
+    }
+
+    /**
+     * Returns a controller parameter. For example URL or action
+     * @param string $param
+     * @return string value of parameter or false
+     */
+    public function getControllerParam($param)
+    {
+        return $this->get('controllerParams', $param);
+    }
+
+    /**
+     * Returns a controller parameter. For example URL or action
+     * @param string $param
+     * @return string value of parameter or false
+     */
+    public function getQueryParam($param)
     {
         return $this->get('getData', $param);
     }
@@ -171,12 +202,23 @@ class RequestComponent extends RequestHandlerComponent
      */
     public function initialize(&$controller, $settings = array())
     {
-        $this->getData = array_map(
-            function($value) {
-                return (is_string($value)) ? urldecode($value) : $value;
-            },
-            array_merge($_GET, $controller->params)
+        $this->getData = $controller->params['url'];
+
+        $namedParams = array_diff_key(
+            $controller->params['url'],
+            array_flip(['plugin', 'controller', 'action', 'url', 'form', 'named', 'pass'])
         );
+
+        foreach ($namedParams as $key => $value) {
+            $namedParams[$key] = urldecode($value);
+        }
+
+        $this->controllerParams = array_diff_key(
+            $controller->params,
+            $namedParams
+        );
+
+        $this->parameters = array_merge($this->getData, $namedParams);
 
         $this->postData = $_POST;
         $this->headers = getallheaders();
