@@ -202,17 +202,16 @@ class RequestComponent extends RequestHandlerComponent
      */
     public function initialize(&$controller, $settings = array())
     {
-        foreach ($_GET as $key => $value) {
-            $this->getData[$key] = urldecode($value);
-        }
-
-        $cakeVariable = ['plugin', 'controller', 'action', 'url', 'form', 'named', 'pass'];
-
+        $this->getData = $controller->params['url'];
 
         $namedParams = array_diff_key(
-            $controller->params,
+            $controller->params['url'],
             array_flip(['plugin', 'controller', 'action', 'url', 'form', 'named', 'pass'])
         );
+
+        foreach ($namedParams as $key => $value) {
+            $namedParams[$key] = urldecode($value);
+        }
 
         $this->controllerParams = array_diff_key(
             $controller->params,
