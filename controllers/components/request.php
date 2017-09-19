@@ -205,7 +205,7 @@ class RequestComponent extends RequestHandlerComponent
         $this->getData = $controller->params['url'];
 
         $namedParams = array_diff_key(
-            $controller->params['url'],
+            $controller->params,
             array_flip(['plugin', 'controller', 'action', 'url', 'form', 'named', 'pass'])
         );
 
