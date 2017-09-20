@@ -206,7 +206,7 @@ class RequestComponent extends RequestHandlerComponent
 
         $namedParams = array_diff_key(
             $controller->params,
-            array_flip(['plugin', 'controller', 'action', 'url', 'form', 'named', 'pass'])
+            array_flip(['plugin', 'controller', 'action', 'url', 'sitemap', 'form', 'named', 'pass'])
         );
 
         foreach ($namedParams as $key => $value) {
