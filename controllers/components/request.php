@@ -16,17 +16,30 @@ class RequestComponent extends RequestHandlerComponent
     private $content = '';
     private $contentTruncated = false;
     private $headers = [];
+    private $coreParams = ['plugin', 'controller', 'action', 'url', 'sitemap', 'form', 'pass', 'data'];
 
+    /**
+     * Returns all named and query parameters
+     * @return array
+     */
     public function getParams()
     {
         return $this->parameters;
     }
 
+    /**
+     * Returns all query parameters
+     * @return array
+     */
     public function getQueryParams()
     {
         return $this->getData;
     }
 
+    /**
+     * Returns named controller parameters passed by routes
+     * @return array
+     */
     public function getControllerParams()
     {
         return $this->controllerParams;
@@ -82,7 +95,7 @@ class RequestComponent extends RequestHandlerComponent
     }
 
     /**
-     * Returns a url GET parameter by name including named http://parameters/
+     * Returns a query GET or named parameter
      * @param string $param
      * @return string value of parameter or false
      */
@@ -92,7 +105,7 @@ class RequestComponent extends RequestHandlerComponent
     }
 
     /**
-     * Returns a controller parameter. For example URL or action
+     * Returns a controller named parameter
      * @param string $param
      * @return string value of parameter or false
      */
@@ -102,7 +115,7 @@ class RequestComponent extends RequestHandlerComponent
     }
 
     /**
-     * Returns a controller parameter. For example URL or action
+     * Returns a query GET parameter
      * @param string $param
      * @return string value of parameter or false
      */
@@ -204,9 +217,12 @@ class RequestComponent extends RequestHandlerComponent
     {
         $this->getData = $controller->params['url'];
 
-        $namedParams = array_diff_key(
-            $controller->params,
-            array_flip(['plugin', 'controller', 'action', 'url', 'sitemap', 'form', 'named', 'pass'])
+        $namedParams = iterator_to_array(
+            new RecursiveIteratorIterator(
+                new RecursiveArrayIterator(
+                    array_diff_key($controller->params, array_flip($this->coreParams))
+                )
+            )
         );
 
         foreach ($namedParams as $key => $value) {
